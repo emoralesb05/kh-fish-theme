@@ -144,7 +144,7 @@ function cast
     set script_name $argv[1]
     if test -n "$script_name"
         set available_scripts (node -e 'console.log(Object.keys(require("./package.json").scripts || {}).join("\n"))' 2>/dev/null)
-        if not echo $available_scripts | grep -q "^$script_name\$"
+        if not contains $script_name $available_scripts
             set_color '#ff005f'
             echo "🌑 Spell '$script_name' not found in your spellbook!"
             echo "   Available spells:"
