@@ -140,6 +140,12 @@ function cast
         return 1
     end
     
+    # Detect package manager (prefer pnpm if lockfile exists, otherwise npm)
+    set package_manager "npm"
+    if test -f pnpm-lock.yaml
+        set package_manager "pnpm"
+    end
+    
     # Check if the script exists in package.json
     set script_name $argv[1]
     if test -n "$script_name"
@@ -158,7 +164,7 @@ function cast
         end
     end
     
-    npm run $argv
+    $package_manager run $argv
 end
 
 

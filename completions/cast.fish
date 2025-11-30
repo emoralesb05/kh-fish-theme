@@ -1,2 +1,2 @@
-# Completion for cast command (npm run)
+# Completion for cast command (npm/pnpm run)
 complete -c cast -f -a "(if test -f package.json; node -e 'console.log(Object.keys(require(\"./package.json\").scripts || {}).join(\"\\n\"))' 2>/dev/null; end)" -d "🔮 Spell to cast" 
