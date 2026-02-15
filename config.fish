@@ -156,18 +156,6 @@ function __fish_kh_prompt_full
     echo
 
     # ── KH Command Menu Box ──
-    # Selected row gets a full highlight background like the actual game
-    # Box has a shadow on right+bottom edge for depth
-    #
-    #  ╭──────────────╮
-    #  │▶ Attack      │▒
-    #  │  Magic       │▒
-    #  │  Items       │▒
-    #  │  Save        │▒
-    #  ╰──────────────╯▒
-    #   ▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒
-
-    # Interior width: 14 chars (2 cursor + 8 label + 4 pad)
     set_color $KH_BLUE
     echo ' ╭──────────────╮'
 
@@ -322,14 +310,12 @@ function __fish_kh_prompt_minimal
     set_color normal
 end
 
-# ── Right Prompt — KH HUD Gauges ──
+# ── Right Prompt — KH Character HUD ──
 function fish_right_prompt
-    # Compute bar levels from cached git data
     set -l hp (__fish_kh_hp_level)
-    set -l drive (__fish_kh_drive_level)
     set -l mp (__fish_kh_mp_level)
 
-    # Command duration (shown first, subtle)
+    # Command duration
     if test "$CMD_DURATION" -gt 100 2>/dev/null
         set -l duration_str
         if test "$CMD_DURATION" -gt 60000
@@ -340,13 +326,11 @@ function fish_right_prompt
             set duration_str "$CMD_DURATION""ms"
         end
         set_color $KH_SLATE
-        echo -n "$duration_str "
+        echo -n "$duration_str  "
     end
 
-    # KH-style stacked gauges: ┃██████░░┃
+    # HP + MP bars
     __fish_kh_render_bar 'HP' $hp $KH_GREEN $KH_GOLD $KH_RED
-    echo -n ' '
-    __fish_kh_render_bar 'DR' $drive $KH_CYAN $KH_MAUVE $KH_SLATE
     echo -n ' '
     __fish_kh_render_bar 'MP' $mp $KH_TEAL $KH_TEAL $KH_MAUVE
 
