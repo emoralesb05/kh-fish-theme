@@ -54,9 +54,16 @@ end
 if not set -q KH_BAR_WIDTH
     set -g KH_BAR_WIDTH 10
 end
+if not set -q KH_HEARTLESS
+    set -g KH_HEARTLESS 'true'
+end
 
 # ── Load HUD helpers ──
 source $__fish_config_dir/functions/kh_hud_helpers.fish
+
+# ── Load Heartless encounters ──
+source $__fish_config_dir/functions/kh_heartless.fish
+__fish_kh_heartless_init
 
 # ── Helper: Path ──
 function __fish_kh_path
@@ -82,16 +89,17 @@ function fish_prompt
     set -l fourth_slot (__fish_kh_4th_slot)
     set -l party (__fish_kh_party_members)
     set -l world (__fish_kh_detect_world)
+    set -l cursor_pos (__fish_kh_menu_cursor)
 
     switch $KH_PROMPT_MODE
         case full
-            __fish_kh_prompt_full $last_status "$display_path" "$git_info" "$fourth_slot" "$party" "$world"
+            __fish_kh_prompt_full $last_status "$display_path" "$git_info" "$fourth_slot" "$party" "$world" $cursor_pos
         case compact
-            __fish_kh_prompt_compact $last_status "$display_path" "$git_info" "$fourth_slot" "$party" "$world"
+            __fish_kh_prompt_compact $last_status "$display_path" "$git_info" "$fourth_slot" "$party" "$world" $cursor_pos
         case minimal
             __fish_kh_prompt_minimal $last_status "$display_path" "$git_info" "$world"
         case '*'
-            __fish_kh_prompt_full $last_status "$display_path" "$git_info" "$fourth_slot" "$party" "$world"
+            __fish_kh_prompt_full $last_status "$display_path" "$git_info" "$fourth_slot" "$party" "$world" $cursor_pos
     end
 end
 
@@ -103,6 +111,7 @@ function __fish_kh_prompt_full
     set -l fourth_slot $argv[4]
     set -l party $argv[5]
     set -l world $argv[6]
+    set -l cursor_pos $argv[7]
 
     if test $last_status -ne 0
         set heart_color $KH_RED
@@ -113,66 +122,52 @@ function __fish_kh_prompt_full
     # Pad 4th slot text to fit 8-char interior
     set -l slot_padded (printf '%-8s' "$fourth_slot")
 
+    # Menu item labels and their colors
+    set -l labels 'Attack  ' 'Magic   ' 'Items   ' "$slot_padded"
+    set -l label_colors $KH_WHITE $KH_WHITE $KH_WHITE $__kh_4th_slot_color
+
     # Menu box top
     set_color $KH_BLUE
     echo ' ┌──────────┐'
 
-    # Line 1: ♥ Attack  |  path  git
-    set_color $KH_BLUE
-    echo -n ' │'
-    set_color $heart_color
-    echo -n '♥'
-    set_color $KH_WHITE --bold
-    echo -n ' Attack  '
-    set_color $KH_BLUE
-    echo -n '│'
-    set_color normal
-    echo -n '  '
-    set_color $KH_GOLD
-    echo -n "$display_path"
-    if test -n "$git_info"
-        echo -n " $git_info"
+    # Render 4 menu rows with dynamic ♥ cursor
+    for i in 1 2 3 4
+        set_color $KH_BLUE
+        echo -n ' │'
+
+        if test "$i" -eq "$cursor_pos"
+            set_color $heart_color
+            echo -n '♥'
+            set_color $label_colors[$i] --bold
+        else
+            set_color $KH_SLATE
+            echo -n ' '
+            set_color $label_colors[$i]
+        end
+
+        echo -n " $labels[$i]"
+        set_color $KH_BLUE
+        echo -n '│'
+
+        # Right-side info on specific rows
+        if test $i -eq 1
+            set_color normal
+            echo -n '  '
+            set_color $KH_GOLD
+            echo -n "$display_path"
+            if test -n "$git_info"
+                echo -n " $git_info"
+            end
+        else if test $i -eq 2
+            if test -n "$party"
+                set_color normal
+                echo -n '  '
+                set_color $KH_ICY
+                echo -n "$party"
+            end
+        end
+        echo
     end
-    echo
-
-    # Line 2: Magic  |  party members
-    set_color $KH_BLUE
-    echo -n ' │'
-    set_color $KH_SLATE
-    echo -n '  '
-    set_color $KH_WHITE
-    echo -n 'Magic   '
-    set_color $KH_BLUE
-    echo -n '│'
-    if test -n "$party"
-        set_color normal
-        echo -n '  '
-        set_color $KH_ICY
-        echo -n "$party"
-    end
-    echo
-
-    # Line 3: Items
-    set_color $KH_BLUE
-    echo -n ' │'
-    set_color $KH_SLATE
-    echo -n '  '
-    set_color $KH_WHITE
-    echo -n 'Items   '
-    set_color $KH_BLUE
-    echo -n '│'
-    echo
-
-    # Line 4: Context-sensitive slot
-    set_color $KH_BLUE
-    echo -n ' │'
-    set_color $KH_SLATE
-    echo -n '  '
-    set_color $__kh_4th_slot_color
-    echo -n "$slot_padded"
-    set_color $KH_BLUE
-    echo -n '│'
-    echo
 
     # Menu box bottom
     set_color $KH_BLUE
@@ -199,6 +194,7 @@ function __fish_kh_prompt_compact
     set -l fourth_slot $argv[4]
     set -l party $argv[5]
     set -l world $argv[6]
+    set -l cursor_pos $argv[7]
 
     if test $last_status -ne 0
         set heart_color $KH_RED
@@ -206,23 +202,28 @@ function __fish_kh_prompt_compact
         set heart_color $KH_GREEN
     end
 
-    # Line 1: menu items inline + path + git
-    set_color $heart_color
-    echo -n ' ♥ '
-    set_color $KH_WHITE --bold
-    echo -n 'Attack'
-    set_color $KH_SLATE
-    echo -n ' │ '
-    set_color $KH_WHITE
-    echo -n 'Magic'
-    set_color $KH_SLATE
-    echo -n ' │ '
-    set_color $KH_WHITE
-    echo -n 'Items'
-    set_color $KH_SLATE
-    echo -n ' │ '
-    set_color $__kh_4th_slot_color
-    echo -n "$fourth_slot"
+    # Line 1: menu items inline with dynamic ♥ cursor + path + git
+    set -l compact_labels 'Attack' 'Magic' 'Items' "$fourth_slot"
+    set -l compact_colors $KH_WHITE $KH_WHITE $KH_WHITE $__kh_4th_slot_color
+
+    echo -n ' '
+    for i in 1 2 3 4
+        if test $i -gt 1
+            set_color $KH_SLATE
+            echo -n ' │ '
+        end
+        if test "$i" -eq "$cursor_pos"
+            set_color $heart_color
+            echo -n '♥ '
+            set_color $compact_colors[$i] --bold
+        else
+            set_color $compact_colors[$i]
+        end
+        echo -n "$compact_labels[$i]"
+        if test "$i" -eq "$cursor_pos"
+            set_color normal
+        end
+    end
     echo -n '   '
     set_color $KH_GOLD
     echo -n "$display_path"

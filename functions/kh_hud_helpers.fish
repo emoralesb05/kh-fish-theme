@@ -253,6 +253,53 @@ function __fish_kh_4th_slot
     echo 'Defend'
 end
 
+# ── Dynamic Menu Cursor Position ──
+# Collects all applicable menu rows and randomly picks one each prompt.
+# The ♥ cursor feels alive — shifting between relevant actions.
+function __fish_kh_menu_cursor
+    set -l candidates
+
+    # Attack is always an option
+    set -a candidates 1
+
+    # Magic: when in a project with scripts
+    if test -f package.json
+        set -a candidates 2
+    end
+
+    # Items: when stashes exist
+    if test "$__kh_git_is_repo" -eq 1
+        if test "$__kh_git_stash_count" -gt 0
+            set -a candidates 3
+        end
+    end
+
+    # 4th slot: Save/Drive/Defend based on state
+    if test "$__kh_git_is_repo" -eq 1
+        if test "$__kh_git_dirty_total" -gt 0 -o "$__kh_git_staged" -gt 0
+            set -a candidates 4  # Save
+        end
+        if test "$__kh_git_ahead" -gt 0
+            set -a candidates 4  # Drive
+        end
+        if test "$__kh_git_behind" -gt 0
+            set -a candidates 4  # Defend
+        end
+    end
+
+    # Deduplicate (4 could be added multiple times)
+    set -l unique
+    for c in $candidates
+        if not contains -- $c $unique
+            set -a unique $c
+        end
+    end
+
+    # Random pick from applicable options
+    set -l idx (random 1 (count $unique))
+    echo $unique[$idx]
+end
+
 # ── Party Members: Runtime Detection ──
 function __fish_kh_party_members
     if test "$KH_SHOW_PARTY" = 'false'
