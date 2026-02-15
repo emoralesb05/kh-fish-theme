@@ -5,21 +5,21 @@ set -g fish_function_path $fish_function_path $__fish_config_dir/functions
 
 # ── Kingdom Hearts Color Palette ──
 # Reusable color variables for prompt, welcome, and functions
-set -g KH_BLUE    '#185fad'   # Royal blue — signature KH command menu
+set -g KH_BLUE    '#2a6fc0'   # Royal blue — signature KH command menu
 set -g KH_WHITE   '#f9f9f9'   # Near-white menu text
 set -g KH_GREEN   '#00ff9f'   # HP full / success
-set -g KH_RED     '#ff005f'   # HP critical / error
+set -g KH_RED     '#ff2870'   # HP critical / error
 set -g KH_GOLD    '#f8c169'   # Golden yellow / Sora
 set -g KH_CYAN    '#00d7ff'   # Sky blue / accent
 set -g KH_TEAL    '#00b2d4'   # MP bar
 set -g KH_MAUVE   '#dba8cd'   # Kairi/Naminé pink
-set -g KH_SLATE   '#434d71'   # Borders / dim text
-set -g KH_DARK    '#26244f'   # Dark panel background
+set -g KH_SLATE   '#8088a8'   # Borders / dim text
+set -g KH_DARK    '#3d3b6b'   # Dark panel background
 set -g KH_ICY     '#c6e2f3'   # Icy blue / subtle
 set -g KH_LIME    '#8ebc4f'   # HP secondary green
 set -g KH_GLOW    '#99f7ff'   # Bright cyan glow
-set -g KH_HILIGHT '#1a3a7a'   # Selected row highlight bg
-set -g KH_SHADOW  '#0d1333'   # Deep shadow for box depth
+set -g KH_HILIGHT '#1f4290'   # Selected row highlight bg
+set -g KH_SHADOW  '#161a40'   # Deep shadow for box depth
 
 # Syntax highlighting colors — authentic KH palette
 set -g fish_color_normal            $KH_WHITE      # Near-white (KH menu text)
@@ -37,6 +37,7 @@ set -g fish_color_valid_path        $KH_LIME       # Lime green (HP secondary)
 set -g fish_color_history_current   $KH_CYAN       # Sky blue
 set -g fish_color_search_match      $KH_GOLD       # Golden highlight
 set -g fish_color_selection         $KH_DARK       # Dark purple-blue (panel bg)
+set -g fish_autosuggestion_highlight_color $KH_SLATE
 
 # ── Configuration ──
 # Prompt mode: 'full' (command menu box), 'compact' (inline menu), 'minimal' (2-line)
@@ -58,6 +59,46 @@ if not set -q KH_BAR_WIDTH
 end
 if not set -q KH_HEARTLESS
     set -g KH_HEARTLESS 'true'
+end
+if not set -q KH_A11Y
+    set -g KH_A11Y 'off'
+end
+
+# ── Accessibility Color Overrides ──
+switch $KH_A11Y
+    case high-contrast
+        set -g KH_SLATE   '#9da3c0'
+        set -g KH_DARK    '#706e96'
+        set -g KH_BLUE    '#3070c0'
+        set -g KH_HILIGHT '#2a509e'
+        set -g KH_SHADOW  '#2a2e55'
+        set -g KH_RED     '#ff4070'
+        set -g KH_TEAL    '#00c8e8'
+        set -g fish_color_comment        $KH_SLATE
+        set -g fish_color_autosuggestion $KH_SLATE
+        set -g fish_color_error          $KH_RED
+        set -g fish_color_selection      $KH_DARK
+        set -g fish_autosuggestion_highlight_color $KH_SLATE
+
+    case colorblind
+        set -g KH_SLATE   '#9da3c0'
+        set -g KH_DARK    '#706e96'
+        set -g KH_BLUE    '#3070c0'
+        set -g KH_HILIGHT '#2a509e'
+        set -g KH_SHADOW  '#2a2e55'
+        set -g KH_GREEN   '#4dc3ff'
+        set -g KH_RED     '#ff9e3d'
+        set -g KH_LIME    '#7fb8e0'
+        set -g KH_TEAL    '#7ba4d4'
+        set -g KH_CYAN    '#40b0f0'
+        set -g fish_color_command        $KH_CYAN
+        set -g fish_color_comment        $KH_SLATE
+        set -g fish_color_autosuggestion $KH_SLATE
+        set -g fish_color_error          $KH_RED
+        set -g fish_color_end            $KH_GREEN
+        set -g fish_color_valid_path     $KH_LIME
+        set -g fish_color_selection      $KH_DARK
+        set -g fish_autosuggestion_highlight_color $KH_SLATE
 end
 
 # ── Load HUD helpers ──

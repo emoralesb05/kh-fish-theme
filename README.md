@@ -19,30 +19,30 @@ set -g KH_PROMPT_MODE minimal   # 2-line minimal
 ### Full Mode
 
 ```
-  ~/Github/myproject  main ↑2 +1 ~3 ?2 ≡1         Node 20.11 · Python 3.12 · Docker
+  ~/Github/myproject  main ↑2 +1 ~3 ?2 ≡1       Node 20.11 · Python 3.12 · Docker
  ╭──────────────╮
  │▶ Attack      │
  │  Magic       │
  │  Items       │
  │  Save        │
  ╰──────────────╯
-  ⚔ Traverse Town  ❯                               HP ████████░░  MP █████░░░░░
+  ⚔ Traverse Town  ❯ _                              1.2s HP▕████████━━▏ MP▕█████━━━━━▏
 ```
 
-The selected menu row gets a highlight background with a `▶` cursor. Unselected rows have a dark panel background. The cursor position changes randomly each prompt.
+Path and git status appear above the menu box, with party members right-aligned. The selected menu row gets a highlight background with a `▶` cursor. Unselected rows have a dark panel background. The cursor position changes randomly each prompt. The right prompt shows command duration and gauge bars.
 
 ### Compact Mode
 
 ```
-  ▶Attack  Magic  Items  Save   ~/Github/myproject  main ↑2 +1 ~3  Node · Docker
-  ⚔ Traverse Town  ❯                               HP ████████░░  MP █████░░░░░
+  ▶Attack  Magic Items Save  ~/Github/myproject  main ↑2 +1 ~3       Node · Docker
+  ⚔ Traverse Town  ❯ _                              1.2s HP▕████████━━▏ MP▕█████━━━━━▏
 ```
 
 ### Minimal Mode
 
 ```
   ~/Github/myproject  main ↑2 +1 ~3
-  ⚔ Traverse Town  ❯                               HP ████████░░  MP █████░░░░░
+  ⚔ Traverse Town  ❯ _                              1.2s HP▕████████━━▏ MP▕█████━━━━━▏
 ```
 
 ## Prompt Elements
@@ -113,7 +113,7 @@ The project type is mapped to a Kingdom Hearts world name, shown as a badge on t
 Two gauge bars in the right prompt represent meaningful dev metrics:
 
 ```
-1.2s  HP ▕████████━━▏  MP ▕█████━━━━━▏
+1.2s HP▕████████━━▏ MP▕█████━━━━━▏
 ```
 
 ### HP — Repo Cleanliness
@@ -212,7 +212,14 @@ set -g KH_SHOW_WORLD 'true'     # Show project type as KH world name
 set -g KH_SHOW_CLOCK 'true'     # Show clock in right prompt (on by default)
 set -g KH_BAR_WIDTH 10          # Gauge bar width (auto-shrinks to 6 on narrow terminals)
 set -g KH_HEARTLESS 'true'      # Show Heartless encounters on command failure
+set -g KH_A11Y 'off'            # Accessibility: off | high-contrast | colorblind
 ```
+
+### Accessibility Modes (`KH_A11Y`)
+
+- **`off`** — Default palette with improved visibility for bar labels and empty gauge segments
+- **`high-contrast`** — WCAG AA compliant (4.5:1+ contrast). Brightens all dim elements including borders, labels, and bar tracks
+- **`colorblind`** — Replaces red/green with blue/orange to be safe for deuteranopia, protanopia, and tritanopia. Also includes the high-contrast readability improvements
 
 ## Color Palette
 
@@ -220,18 +227,18 @@ Authentic Kingdom Hearts colors sourced from the game UI:
 
 | Variable | Hex | Usage |
 |----------|-----|-------|
-| `KH_BLUE` | `#185fad` | Command menu borders (signature KH blue) |
+| `KH_BLUE` | `#2a6fc0` | Command menu borders (signature KH blue) |
 | `KH_WHITE` | `#f9f9f9` | Menu text |
 | `KH_GREEN` | `#00ff9f` | HP bar, success, staged files |
-| `KH_RED` | `#ff005f` | HP critical, errors, modified files |
+| `KH_RED` | `#ff2870` | HP critical, errors, modified files |
 | `KH_GOLD` | `#f8c169` | Path display, golden yellow |
 | `KH_CYAN` | `#00d7ff` | Branch names, commands |
 | `KH_TEAL` | `#00b2d4` | MP bar |
 | `KH_MAUVE` | `#dba8cd` | Behind count, stash, Kairi/Namine pink |
-| `KH_SLATE` | `#434d71` | Borders, dim text, comments |
-| `KH_DARK` | `#26244f` | Unselected row background |
-| `KH_HILIGHT` | `#1a3a7a` | Selected row highlight background |
-| `KH_SHADOW` | `#0d1333` | Deep shadow for box depth |
+| `KH_SLATE` | `#8088a8` | Borders, dim text, comments |
+| `KH_DARK` | `#3d3b6b` | Unselected row background, empty bar track |
+| `KH_HILIGHT` | `#1f4290` | Selected row highlight background |
+| `KH_SHADOW` | `#161a40` | Deep shadow for box depth |
 | `KH_ICY` | `#c6e2f3` | Party members, world name, subtle text |
 | `KH_LIME` | `#8ebc4f` | Valid paths |
 | `KH_GLOW` | `#99f7ff` | Escape sequences, bright cyan |

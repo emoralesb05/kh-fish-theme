@@ -11,7 +11,6 @@ set -gx LC_ALL 'en_US.UTF-8'
 
 # Fish specific settings
 set -g fish_autosuggestion_enabled 1
-set -g fish_autosuggestion_highlight_color '#434d71'
 
 # Development environment
 if command -q go
