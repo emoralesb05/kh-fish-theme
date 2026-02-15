@@ -51,7 +51,7 @@ if not set -q KH_SHOW_WORLD
     set -g KH_SHOW_WORLD 'true'
 end
 if not set -q KH_SHOW_CLOCK
-    set -g KH_SHOW_CLOCK 'false'
+    set -g KH_SHOW_CLOCK 'true'
 end
 if not set -q KH_BAR_WIDTH
     set -g KH_BAR_WIDTH 10

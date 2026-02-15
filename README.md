@@ -1,6 +1,6 @@
 # Kingdom Hearts Fish Theme
 
-A Fish shell configuration inspired by the Kingdom Hearts universe. Features a KH Command Menu prompt, HP/MP/Drive gauge bars, world detection, party member display, and themed git navigation.
+A Fish shell configuration inspired by the Kingdom Hearts universe. Features a KH Command Menu prompt, HP/MP gauge bars, world detection, party member display, Heartless encounters, and themed git navigation.
 
 ![Kingdom Hearts Terminal](https://img.shields.io/badge/Theme-Kingdom%20Hearts-purple?style=for-the-badge&logo=terminal)
 ![Fish Shell](https://img.shields.io/badge/Shell-Fish-blue?style=for-the-badge&logo=terminal)
@@ -19,36 +19,38 @@ set -g KH_PROMPT_MODE minimal   # 2-line minimal
 ### Full Mode
 
 ```
- ┌──────────┐
- │♥ Attack  │  ~/Github/myproject   main ↑2 +1 ~3 ?2 ≡1
- │  Magic   │  Node 20.11 · Python 3.12 · Docker
- │  Items   │
- │  Save    │
- └──────────┘                               HP ████████░░  DR ██░░░░░░░░  MP █████░░░░░
- 🗝️  ⚔ Traverse Town
+  ~/Github/myproject  main ↑2 +1 ~3 ?2 ≡1         Node 20.11 · Python 3.12 · Docker
+ ╭──────────────╮
+ │▶ Attack      │
+ │  Magic       │
+ │  Items       │
+ │  Save        │
+ ╰──────────────╯
+  ⚔ Traverse Town  ❯                               HP ████████░░  MP █████░░░░░
 ```
+
+The selected menu row gets a highlight background with a `▶` cursor. Unselected rows have a dark panel background. The cursor position changes randomly each prompt.
 
 ### Compact Mode
 
 ```
- ♥ Attack │ Magic │ Items │ Save   ~/Github/myproject   main ↑2 +1 ~3
- ──────────────────── Node 20.11 · Docker │ ⚔ Traverse Town
- 🗝️                                        HP ████████░░  DR ██░░░░░░░░  MP █████░░░░░
+  ▶Attack  Magic  Items  Save   ~/Github/myproject  main ↑2 +1 ~3  Node · Docker
+  ⚔ Traverse Town  ❯                               HP ████████░░  MP █████░░░░░
 ```
 
 ### Minimal Mode
 
 ```
- ♥ ~/Github/myproject   main ↑2 +1 ~3
- 🗝️  ⚔ Traverse Town                       HP ████████░░  DR ██░░░░░░░░  MP █████░░░░░
+  ~/Github/myproject  main ↑2 +1 ~3
+  ⚔ Traverse Town  ❯                               HP ████████░░  MP █████░░░░░
 ```
 
 ## Prompt Elements
 
-### Heart Cursor
+### Menu Cursor
 
-The `♥` changes color based on the last command's exit status:
-- **Green** — command succeeded
+The `▶` cursor highlights a random eligible menu item each prompt, making the menu feel alive like in the game. The `❯` input cursor on the world line changes color based on the last command's exit status:
+- **Cyan** — command succeeded
 - **Red** — command failed
 
 ### Git Status
@@ -80,7 +82,7 @@ The bottom menu item changes based on your current state, just like in the game:
 
 ### Party Members
 
-Detected runtimes show beside the Magic row (full mode) or on the separator line (compact mode). Detection is based on project files in the current directory:
+Detected runtimes show on the path line (full mode) or inline (compact mode). Detection is based on project files in the current directory:
 
 | Runtime | Detected by |
 |---------|-------------|
@@ -94,7 +96,7 @@ Detected runtimes show beside the Magic row (full mode) or on the separator line
 
 ### World Detection
 
-The project type is mapped to a Kingdom Hearts world name, shown on the input line:
+The project type is mapped to a Kingdom Hearts world name, shown as a badge on the input line with a blue background:
 
 | World | Detection |
 |-------|-----------|
@@ -108,10 +110,10 @@ The project type is mapped to a Kingdom Hearts world name, shown on the input li
 
 ## Gauge Bars (Right Prompt)
 
-Three gauge bars in the right prompt represent meaningful dev metrics:
+Two gauge bars in the right prompt represent meaningful dev metrics:
 
 ```
-HP ████████░░  DR ██░░░░░░░░  MP █████░░░░░  1.2s
+1.2s  HP ▕████████━━▏  MP ▕█████━━━━━▏
 ```
 
 ### HP — Repo Cleanliness
@@ -124,14 +126,6 @@ Full when clean, depletes as your working tree gets dirty.
 - Staged files: -2 per file
 - Color: green (>60%) → gold (30-60%) → red (<30%)
 
-### DR (Drive) — WIP Pressure
-
-Fills up as you accumulate unpushed commits. Each commit = +10%, caps at 100%.
-
-- Empty = in sync with remote
-- Full = 10+ unpushed commits (time to push)
-- Color: cyan → mauve → slate
-
 ### MP — Branch Focus
 
 Full when changes are focused, depletes as changes spread across files and directories.
@@ -142,7 +136,7 @@ Full when changes are focused, depletes as changes spread across files and direc
 
 ### Command Duration
 
-Shown as small text after the bars when a command takes >100ms. Format: `ms`, `s`, or `m`.
+Shown as small text before the bars when a command takes >100ms. Format: `ms`, `s`, or `m`.
 
 ## Commands
 
@@ -157,6 +151,16 @@ Shown as small text after the bars when a command takes >100ms. Format: `ms`, `s
 | `home` | Switch back to main/master |
 | `purify` | Delete all branches except main/master |
 | `sanctuary [branches]` | Delete branches except specified ones (keeps main, develop) |
+
+### Save Points (Git Stash)
+
+| Command | Description |
+|---------|-------------|
+| `save` | Stash changes with default message "Save Point" |
+| `save "message"` | Stash changes with a custom message |
+| `load` | Pop the latest stash |
+| `load list` | List all save points with indices |
+| `load <number>` | Apply a specific stash by index |
 
 ### Magic Casting (npm/pnpm)
 
@@ -173,7 +177,25 @@ Automatically detects pnpm (via `pnpm-lock.yaml`) or falls back to npm.
 | Command | Description |
 |---------|-------------|
 | `dive` | Deep status report (git + system info, KH themed) |
+| `heartless` | Show Heartless encounter stats for this session |
 | `kh_refresh` | Clear world/party detection caches |
+
+### Heartless Encounters
+
+When a command fails, a themed Heartless encounter appears based on the exit code:
+
+| Exit Code | Heartless | Flavor |
+|-----------|-----------|--------|
+| 1 | Shadow | "A Shadow appeared!" |
+| 2 | Soldier | "A Soldier heartless attacks!" |
+| 126 | Large Body | "A Large Body blocks your path!" |
+| 127 | Darkside | "Darkside rises from the darkness!" |
+| 130 | Invisible | "You fled from the Invisible!" |
+| 137 | Behemoth | "A Behemoth crushed your process!" |
+| 139 | Guard Armor | "Guard Armor tore through memory!" |
+| Other | Random | Neoshadow, Wyvern, Wizard, Defender, Angel Star, or Crimson Jazz |
+
+Encounters are tracked per session — use the `heartless` command to see your defeat count and types.
 
 ### Pre-exec Quotes
 
@@ -187,8 +209,9 @@ All settings use `set -g` and can be placed in your `config.fish` or set interac
 set -g KH_PROMPT_MODE 'full'     # Prompt style: full | compact | minimal
 set -g KH_SHOW_PARTY 'true'     # Show detected runtimes as party members
 set -g KH_SHOW_WORLD 'true'     # Show project type as KH world name
-set -g KH_SHOW_CLOCK 'false'    # Show clock in right prompt (off by default)
+set -g KH_SHOW_CLOCK 'true'     # Show clock in right prompt (on by default)
 set -g KH_BAR_WIDTH 10          # Gauge bar width (auto-shrinks to 6 on narrow terminals)
+set -g KH_HEARTLESS 'true'      # Show Heartless encounters on command failure
 ```
 
 ## Color Palette
@@ -202,11 +225,13 @@ Authentic Kingdom Hearts colors sourced from the game UI:
 | `KH_GREEN` | `#00ff9f` | HP bar, success, staged files |
 | `KH_RED` | `#ff005f` | HP critical, errors, modified files |
 | `KH_GOLD` | `#f8c169` | Path display, golden yellow |
-| `KH_CYAN` | `#00d7ff` | Branch names, Drive bar, commands |
+| `KH_CYAN` | `#00d7ff` | Branch names, commands |
 | `KH_TEAL` | `#00b2d4` | MP bar |
 | `KH_MAUVE` | `#dba8cd` | Behind count, stash, Kairi/Namine pink |
 | `KH_SLATE` | `#434d71` | Borders, dim text, comments |
-| `KH_DARK` | `#26244f` | Selection background |
+| `KH_DARK` | `#26244f` | Unselected row background |
+| `KH_HILIGHT` | `#1a3a7a` | Selected row highlight background |
+| `KH_SHADOW` | `#0d1333` | Deep shadow for box depth |
 | `KH_ICY` | `#c6e2f3` | Party members, world name, subtle text |
 | `KH_LIME` | `#8ebc4f` | Valid paths |
 | `KH_GLOW` | `#99f7ff` | Escape sequences, bright cyan |
@@ -242,14 +267,19 @@ source ~/.config/fish/config.fish
 │   └── kh_env.fish               # Environment variables
 ├── functions/
 │   ├── gummi_ship.fish           # Git branch management commands
+│   ├── kh_heartless.fish         # Heartless encounter system
 │   ├── kh_hud_helpers.fish       # HUD: git data, bars, party, world detection
 │   ├── kingdom_hearts_welcome.fish # Welcome screen
-│   └── sanctuary.fish            # Branch purification
+│   ├── load.fish                 # Load Save Point (git stash pop/apply)
+│   ├── sanctuary.fish            # Branch purification
+│   └── save.fish                 # Save Point (git stash push)
 └── completions/
     ├── cast.fish                 # Tab completion for cast
+    ├── load.fish                 # Tab completion for load
+    ├── sanctuary.fish            # Tab completion for sanctuary
+    ├── save.fish                 # Tab completion for save
     ├── traverse.fish             # Tab completion for traverse
-    ├── unlock.fish               # Tab completion for unlock
-    └── sanctuary.fish            # Tab completion for sanctuary
+    └── unlock.fish               # Tab completion for unlock
 ```
 
 ## License
