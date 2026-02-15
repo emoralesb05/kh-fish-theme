@@ -167,4 +167,13 @@ function cast
     $package_manager run $argv
 end
 
-
+# Cache refresh command
+function kh_refresh --description "Invalidate KH prompt caches (world and party detection)"
+    set -e __kh_world_cache_dir
+    set -e __kh_world_cache_name
+    set -e __kh_party_cache_dir
+    set -e __kh_party_cache_result
+    set_color $KH_GREEN
+    echo "✨ Cache cleared. World and party detection will refresh on next prompt."
+    set_color normal
+end

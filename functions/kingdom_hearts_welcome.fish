@@ -1,26 +1,60 @@
 function kingdom_hearts_welcome
-    set_color '#ffd700'
-    echo "╔══════════════════════════════════════════════════════════════╗"
-    echo "║                  KINGDOM HEARTS TERMINAL 👑                  ║"
-    echo "║            May your heart be your guiding key!               ║"
-    echo "╚══════════════════════════════════════════════════════════════╝"
+    echo
+
+    # Title — Station of Awakening style
+    set_color $KH_BLUE
+    echo '  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━'
+    set_color $KH_CYAN
+    echo '       K I N G D O M   H E A R T S'
+    set_color $KH_SLATE
+    echo '          Station of Awakening'
+    set_color $KH_BLUE
+    echo '  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━'
+    echo
+
+    # Party info
+    set_color $KH_GOLD
+    echo -n '  Wielder  '
+    set_color $KH_WHITE
+    echo (whoami)
+
+    set_color $KH_GOLD
+    echo -n '  World    '
+    set_color $KH_WHITE
+    echo (hostname -s 2>/dev/null; or hostname)
+
+    set_color $KH_GOLD
+    echo -n '  Time     '
+    set_color $KH_WHITE
+    echo (date '+%A, %B %d  %H:%M')
+
+    set_color $KH_GOLD
+    echo -n '  Journey  '
+    set_color $KH_WHITE
+    set -l up (uptime | string replace -r '.*up\s+' '' | string replace -r ',\s*\d+ user.*' '' | string trim)
+    echo "$up"
+
+    echo
+
+    # Random opening quote
+    set -l opening_quotes \
+        "I've been having these weird thoughts lately..." \
+        "Thinking of you, wherever you are." \
+        "A scattered dream that's like a far-off memory..." \
+        "Who am I? What am I here for?" \
+        "The door is still shut." \
+        "Don't be afraid. You hold the mightiest weapon of all." \
+        "So much to do, so little time..."
+
+    set -l idx (random 1 (count $opening_quotes))
+    set_color $KH_MAUVE
+    echo "  \"$opening_quotes[$idx]\""
     set_color normal
     echo
-    set_color '#00bfff'
-    echo "  🗝️  WIELDER: "(whoami)
-    set_color '#ffff00'
-    echo "  ⏰  TIME: "(date '+%Y-%m-%d %H:%M:%S')
-    set_color '#00ff9f'
-    set uptime_info (uptime | sed 's/.*up \([^,]*\), .*/\1/')
-    if test -n "$uptime_info"
-        echo "  💫  JOURNEY: $uptime_info"
-    else
-        echo "  💫  JOURNEY: Unknown"
-    end
+
+    # Hint
+    set_color $KH_SLATE
+    echo '  Type `dive` to enter the Station of Awakening'
     set_color normal
     echo
-    set_color '#00bfff'
-    echo "  Type 'dive' to enter the Station of Awakening!"
-    set_color normal
-    echo
-end 
+end
