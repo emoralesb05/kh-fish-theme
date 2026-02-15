@@ -139,7 +139,7 @@ function __fish_kh_git_prompt
 end
 
 # ── Bar Renderer ──
-# Renders a colored gauge bar: LABEL ████████░░
+# KH-style gauge: LABEL ┃██████░░┃
 function __fish_kh_render_bar --argument-names label pct color_high color_mid color_low
     set -l width $KH_BAR_WIDTH
     if test "$COLUMNS" -lt 100 2>/dev/null
@@ -167,9 +167,11 @@ function __fish_kh_render_bar --argument-names label pct color_high color_mid co
 
     # Render label
     set_color $bar_color
-    echo -n "$label "
+    echo -n "$label"
 
-    # Render filled portion
+    # Gauge frame + fill
+    set_color $KH_SLATE
+    echo -n '┃'
     set_color $bar_color
     set -l i 0
     while test $i -lt $filled
@@ -177,8 +179,8 @@ function __fish_kh_render_bar --argument-names label pct color_high color_mid co
         set i (math $i + 1)
     end
 
-    # Render empty portion
-    set_color $KH_SLATE
+    # Empty portion — darker
+    set_color $KH_DARK
     set -l empty (math $width - $filled)
     set i 0
     while test $i -lt $empty
@@ -186,6 +188,8 @@ function __fish_kh_render_bar --argument-names label pct color_high color_mid co
         set i (math $i + 1)
     end
 
+    set_color $KH_SLATE
+    echo -n '┃'
     set_color normal
 end
 

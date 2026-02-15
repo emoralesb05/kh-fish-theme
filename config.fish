@@ -104,6 +104,7 @@ function fish_prompt
 end
 
 # ── Prompt Mode: Full Command Menu ──
+# Styled after the actual KH in-game command menu
 function __fish_kh_prompt_full
     set -l last_status $argv[1]
     set -l display_path $argv[2]
@@ -114,75 +115,87 @@ function __fish_kh_prompt_full
     set -l cursor_pos $argv[7]
 
     if test $last_status -ne 0
-        set heart_color $KH_RED
+        set cursor_color $KH_RED
     else
-        set heart_color $KH_GREEN
+        set cursor_color $KH_GLOW
     end
 
-    # Pad 4th slot text to fit 8-char interior
+    # Pad 4th slot to 8 chars to match other labels
     set -l slot_padded (printf '%-8s' "$fourth_slot")
 
-    # Menu item labels and their colors
+    # Menu item labels — all exactly 8 chars wide
     set -l labels 'Attack  ' 'Magic   ' 'Items   ' "$slot_padded"
-    set -l label_colors $KH_WHITE $KH_WHITE $KH_WHITE $__kh_4th_slot_color
 
-    # Menu box top
+    # Line 1: path + git on left, party pushed to right edge
+    # Build left side content
+    set -l left_text "  $display_path"
+    if test -n "$git_info"
+        # Strip ANSI codes from git_info for width calculation
+        set -l git_info_plain (string replace -ra '\e\[[^m]*m' '' -- "$git_info")
+        set left_text "$left_text $git_info_plain"
+    end
+
+    set_color $KH_GOLD
+    echo -n "  $display_path"
+    if test -n "$git_info"
+        echo -n " $git_info"
+    end
+
+    # Right-align party members
+    if test -n "$party"
+        set -l left_len (string length -- "$left_text")
+        set -l party_len (string length -- "$party")
+        set -l padding (math "$COLUMNS - $left_len - $party_len - 1")
+        if test $padding -gt 0
+            printf '%*s' $padding ''
+        end
+        set_color $KH_ICY
+        echo -n "$party"
+    end
+    set_color normal
+    echo
+
+    # Menu box — 13 interior chars: 3 (cursor area) + 8 (label) + 2 (pad)
+    # ╭─────────────╮
+    # │ ▶ Attack    │
+    # │   Magic     │
+    # │   Items     │
+    # │   Save      │
+    # ╰─────────────╯
     set_color $KH_BLUE
-    echo ' ┌──────────┐'
+    echo ' ╭─────────────╮'
 
-    # Render 4 menu rows with dynamic ♥ cursor
     for i in 1 2 3 4
         set_color $KH_BLUE
         echo -n ' │'
 
         if test "$i" -eq "$cursor_pos"
-            set_color $heart_color
-            echo -n '♥'
-            set_color $label_colors[$i] --bold
+            set_color $cursor_color
+            echo -n ' ▶ '
+            set_color $KH_WHITE --bold
         else
-            set_color $KH_SLATE
-            echo -n ' '
-            set_color $label_colors[$i]
+            echo -n '   '
+            set_color $KH_ICY
         end
 
-        echo -n " $labels[$i]"
+        echo -n "$labels[$i]"
         set_color $KH_BLUE
-        echo -n '│'
-
-        # Right-side info on specific rows
-        if test $i -eq 1
-            set_color normal
-            echo -n '  '
-            set_color $KH_GOLD
-            echo -n "$display_path"
-            if test -n "$git_info"
-                echo -n " $git_info"
-            end
-        else if test $i -eq 2
-            if test -n "$party"
-                set_color normal
-                echo -n '  '
-                set_color $KH_ICY
-                echo -n "$party"
-            end
-        end
-        echo
+        echo '  │'
     end
 
-    # Menu box bottom
     set_color $KH_BLUE
-    echo ' └──────────┘'
+    echo ' ╰─────────────╯'
 
-    # Input line with world name
-    set_color $KH_CYAN
-    echo -n ' 🗝️  '
+    # Input line — world badge + cursor
+    echo -n ' '
     if test -n "$world"
-        set_color $KH_SLATE
-        echo -n '⚔ '
-        set_color $KH_ICY
-        echo -n "$world"
+        set_color $KH_DARK --background=$KH_BLUE
+        echo -n " $world "
+        set_color normal
         echo -n ' '
     end
+    set_color $KH_GLOW
+    echo -n '❯ '
     set_color normal
 end
 
@@ -197,61 +210,68 @@ function __fish_kh_prompt_compact
     set -l cursor_pos $argv[7]
 
     if test $last_status -ne 0
-        set heart_color $KH_RED
+        set cursor_color $KH_RED
     else
-        set heart_color $KH_GREEN
+        set cursor_color $KH_GLOW
     end
 
-    # Line 1: menu items inline with dynamic ♥ cursor + path + git
+    # Line 1: menu items inline with dynamic ▶ cursor + path + git
     set -l compact_labels 'Attack' 'Magic' 'Items' "$fourth_slot"
-    set -l compact_colors $KH_WHITE $KH_WHITE $KH_WHITE $__kh_4th_slot_color
 
     echo -n ' '
     for i in 1 2 3 4
         if test $i -gt 1
             set_color $KH_SLATE
-            echo -n ' │ '
+            echo -n '│'
         end
         if test "$i" -eq "$cursor_pos"
-            set_color $heart_color
-            echo -n '♥ '
-            set_color $compact_colors[$i] --bold
+            set_color $cursor_color
+            echo -n '▶'
+            set_color $KH_WHITE --bold
         else
-            set_color $compact_colors[$i]
+            set_color $KH_ICY
         end
         echo -n "$compact_labels[$i]"
         if test "$i" -eq "$cursor_pos"
             set_color normal
         end
     end
-    echo -n '   '
+    echo -n '  '
     set_color $KH_GOLD
     echo -n "$display_path"
     if test -n "$git_info"
         echo -n " $git_info"
     end
-    echo
 
-    # Line 2: separator with party and world
-    set_color $KH_BLUE
-    echo -n ' ────────────────────'
+    # Right-align party members
     if test -n "$party"
-        set_color normal
-        echo -n ' '
+        # Calculate visible width of left content
+        # Menu labels: Attack(6) + Magic(5) + Items(5) + 4th slot + separators(3│) + cursor(▶) + spaces ≈
+        set -l fourth_len (string length -- "$fourth_slot")
+        set -l menu_width (math "1 + 6 + 1 + 5 + 1 + 5 + 1 + $fourth_len + 3 + 2")
+        set -l git_info_plain (string replace -ra '\e\[[^m]*m' '' -- "$git_info")
+        set -l path_git_len (string length -- "  $display_path $git_info_plain")
+        set -l left_len (math "$menu_width + $path_git_len")
+        set -l party_len (string length -- "$party")
+        set -l padding (math "$COLUMNS - $left_len - $party_len - 1")
+        if test $padding -gt 0
+            printf '%*s' $padding ''
+        end
         set_color $KH_ICY
         echo -n "$party"
     end
-    if test -n "$world"
-        set_color $KH_SLATE
-        echo -n ' │ ⚔ '
-        set_color $KH_ICY
-        echo -n "$world"
-    end
     echo
 
-    # Input line
-    set_color $KH_CYAN
-    echo -n ' 🗝️  '
+    # Input line — world badge + cursor
+    echo -n ' '
+    if test -n "$world"
+        set_color $KH_DARK --background=$KH_BLUE
+        echo -n " $world "
+        set_color normal
+        echo -n ' '
+    end
+    set_color $KH_GLOW
+    echo -n '❯ '
     set_color normal
 end
 
@@ -263,16 +283,14 @@ function __fish_kh_prompt_minimal
     set -l world $argv[4]
 
     if test $last_status -ne 0
-        set heart_color $KH_RED
+        set cursor_color $KH_RED
     else
-        set heart_color $KH_GREEN
+        set cursor_color $KH_GLOW
     end
 
-    # Line 1: heart + path + git
-    set_color $heart_color
-    echo -n ' ♥'
-    set_color normal
-    echo -n ' '
+    # Line 1: path + git
+    set_color $KH_SLATE
+    echo -n '  ╍╍ '
     set_color $KH_GOLD
     echo -n "$display_path"
     if test -n "$git_info"
@@ -280,34 +298,28 @@ function __fish_kh_prompt_minimal
     end
     echo
 
-    # Input line with world name
-    set_color $KH_CYAN
-    echo -n ' 🗝️  '
+    # Input line with world badge
+    set_color $KH_SLATE
+    echo -n '  ⚔ '
     if test -n "$world"
-        set_color $KH_SLATE
-        echo -n '⚔ '
-        set_color $KH_ICY
-        echo -n "$world"
+        set_color $KH_DARK --background=$KH_BLUE
+        echo -n " $world "
+        set_color normal
         echo -n ' '
     end
+    set_color $cursor_color
+    echo -n '❯ '
     set_color normal
 end
 
-# ── Right Prompt — HP/DR/MP Gauge Bars ──
+# ── Right Prompt — KH HUD Gauges ──
 function fish_right_prompt
     # Compute bar levels from cached git data
     set -l hp (__fish_kh_hp_level)
     set -l drive (__fish_kh_drive_level)
     set -l mp (__fish_kh_mp_level)
 
-    # Render bars
-    __fish_kh_render_bar 'HP' $hp $KH_GREEN $KH_GOLD $KH_RED
-    echo -n '  '
-    __fish_kh_render_bar 'DR' $drive $KH_CYAN $KH_MAUVE $KH_SLATE
-    echo -n '  '
-    __fish_kh_render_bar 'MP' $mp $KH_TEAL $KH_TEAL $KH_MAUVE
-
-    # Command duration (small text after bars)
+    # Command duration (shown first, subtle)
     if test "$CMD_DURATION" -gt 100 2>/dev/null
         set -l duration_str
         if test "$CMD_DURATION" -gt 60000
@@ -317,14 +329,20 @@ function fish_right_prompt
         else
             set duration_str "$CMD_DURATION""ms"
         end
-        echo -n '  '
         set_color $KH_SLATE
-        echo -n "$duration_str"
+        echo -n "$duration_str "
     end
+
+    # KH-style stacked gauges: ┃██████░░┃
+    __fish_kh_render_bar 'HP' $hp $KH_GREEN $KH_GOLD $KH_RED
+    echo -n ' '
+    __fish_kh_render_bar 'DR' $drive $KH_CYAN $KH_MAUVE $KH_SLATE
+    echo -n ' '
+    __fish_kh_render_bar 'MP' $mp $KH_TEAL $KH_TEAL $KH_MAUVE
 
     # Optional clock
     if test "$KH_SHOW_CLOCK" = 'true'
-        echo -n '  '
+        echo -n ' '
         set_color $KH_SLATE
         echo -n (date '+%H:%M')
     end
