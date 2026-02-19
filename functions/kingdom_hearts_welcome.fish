@@ -55,6 +55,12 @@ function kingdom_hearts_welcome
     # Hint
     set_color $KH_SLATE
     echo '  Type `dive` to enter the Station of Awakening'
+    switch (uname -s)
+        case Darwin
+            echo '  Press ⌥ Space to open the Command Menu'
+        case '*'
+            echo '  Press Ctrl+Space to open the Command Menu'
+    end
     set_color normal
     echo
 end

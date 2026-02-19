@@ -63,6 +63,12 @@ end
 if not set -q KH_A11Y
     set -g KH_A11Y 'off'
 end
+if not set -q KH_MENU_ANIMATE
+    set -g KH_MENU_ANIMATE 'true'
+end
+if not set -q KH_MENU_MAX_ITEMS
+    set -g KH_MENU_MAX_ITEMS 15
+end
 
 # ── Accessibility Color Overrides ──
 switch $KH_A11Y
@@ -146,8 +152,8 @@ function fish_prompt
     end
 end
 
-# ── Prompt Mode: Full Command Menu ──
-# Authentic KH in-game command menu with highlight bar and box shadow
+# ── Prompt Mode: Full ──
+# Path/git/party info + world badge input line (interactive menu via Ctrl+Space)
 function __fish_kh_prompt_full
     set -l last_status $argv[1]
     set -l display_path $argv[2]
@@ -162,12 +168,6 @@ function __fish_kh_prompt_full
     else
         set cursor_color $KH_GLOW
     end
-
-    # Pad 4th slot to 8 chars to match other labels
-    set -l slot_padded (printf '%-8s' "$fourth_slot")
-
-    # Menu item labels — all exactly 8 chars wide
-    set -l labels 'Attack  ' 'Magic   ' 'Items   ' "$slot_padded"
 
     # Line 1: path + git on left, party pushed to right edge
     set -l left_text "  $display_path"
@@ -196,41 +196,6 @@ function __fish_kh_prompt_full
     set_color normal
     echo
 
-    # ── KH Command Menu Box ──
-    set_color $KH_BLUE
-    echo ' ╭──────────────╮'
-
-    for i in 1 2 3 4
-        if test "$i" -eq "$cursor_pos"
-            # Selected row: highlight background across entire row
-            set_color $KH_BLUE
-            echo -n ' │'
-            set_color $KH_WHITE --bold --background=$KH_HILIGHT
-            echo -n '▶ '
-            echo -n "$labels[$i]"
-            echo -n '    '
-            set_color normal
-            set_color $KH_BLUE
-            echo -n '│'
-        else
-            # Unselected row: dark background
-            set_color $KH_BLUE
-            echo -n ' │'
-            set_color normal --background=$KH_DARK
-            echo -n '  '
-            set_color $KH_ICY --background=$KH_DARK
-            echo -n "$labels[$i]"
-            echo -n '    '
-            set_color normal
-            set_color $KH_BLUE
-            echo -n '│'
-        end
-        echo
-    end
-
-    set_color $KH_BLUE
-    echo ' ╰──────────────╯'
-
     # Input line — world badge + keyblade cursor
     echo -n ' '
     if test -n "$world"
@@ -239,12 +204,13 @@ function __fish_kh_prompt_full
         set_color normal
         echo -n ' '
     end
-    set_color $KH_GLOW
+    set_color $cursor_color
     echo -n '❯ '
     set_color normal
 end
 
 # ── Prompt Mode: Compact ──
+# Path/git + party on one line, world badge input line (interactive menu via Ctrl+Space)
 function __fish_kh_prompt_compact
     set -l last_status $argv[1]
     set -l display_path $argv[2]
@@ -260,40 +226,22 @@ function __fish_kh_prompt_compact
         set cursor_color $KH_GLOW
     end
 
-    # Line 1: menu items with highlight on selected + path + git
-    set -l compact_labels 'Attack' 'Magic' 'Items' "$fourth_slot"
-
-    echo -n ' '
-    for i in 1 2 3 4
-        if test $i -gt 1
-            set_color $KH_SLATE
-            echo -n ' '
-        end
-        if test "$i" -eq "$cursor_pos"
-            # Highlighted item with background
-            set_color $KH_WHITE --bold --background=$KH_HILIGHT
-            echo -n " ▶$compact_labels[$i] "
-            set_color normal
-        else
-            set_color $KH_ICY
-            echo -n "$compact_labels[$i]"
-        end
+    # Line 1: path + git on left, party right-aligned
+    set -l left_text "  $display_path"
+    if test -n "$git_info"
+        set -l git_info_plain (string replace -ra '\e\[[^m]*m' '' -- "$git_info")
+        set left_text "$left_text $git_info_plain"
     end
-    echo -n '  '
+
     set_color $KH_GOLD
-    echo -n "$display_path"
+    echo -n "  $display_path"
     if test -n "$git_info"
         echo -n " $git_info"
     end
 
     # Right-align party members
     if test -n "$party"
-        set -l fourth_len (string length -- "$fourth_slot")
-        # Approximate visible width: menu items + separators + path + git
-        set -l menu_width (math "1 + 8 + 1 + 7 + 1 + 7 + 1 + $fourth_len + 2 + 3 + 2")
-        set -l git_info_plain (string replace -ra '\e\[[^m]*m' '' -- "$git_info")
-        set -l path_git_len (string length -- "  $display_path $git_info_plain")
-        set -l left_len (math "$menu_width + $path_git_len")
+        set -l left_len (string length -- "$left_text")
         set -l party_len (string length -- "$party")
         set -l padding (math "$COLUMNS - $left_len - $party_len - 1")
         if test $padding -gt 0
@@ -302,6 +250,7 @@ function __fish_kh_prompt_compact
         set_color $KH_ICY
         echo -n "$party"
     end
+    set_color normal
     echo
 
     # Input line — world badge + cursor
@@ -312,7 +261,7 @@ function __fish_kh_prompt_compact
         set_color normal
         echo -n ' '
     end
-    set_color $KH_GLOW
+    set_color $cursor_color
     echo -n '❯ '
     set_color normal
 end
@@ -433,6 +382,11 @@ set -g fish_greeting ''
 
 # Load gummi ship functions
 source $__fish_config_dir/functions/gummi_ship.fish
+
+# ── Load Interactive Menu ──
+source $__fish_config_dir/functions/kh_menu.fish
+source $__fish_config_dir/functions/kh_menu_bindings.fish
+kh_menu_bindings
 
 # Run Kingdom Hearts welcome on startup
 kingdom_hearts_welcome
