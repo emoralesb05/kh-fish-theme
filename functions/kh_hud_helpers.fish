@@ -227,13 +227,9 @@ function __fish_kh_mp_level
         return
     end
 
-    if test "$__kh_git_files_changed" -eq 0
-        echo 100
-        return
-    end
-
-    set -l spread (math "$__kh_git_dirs_touched * 6 + $__kh_git_files_changed * 2")
-    set -l mp (math "max(0, 100 - $spread)")
+    # MP = sync with remote — drains as you drift ahead or behind
+    set -l drift (math "$__kh_git_ahead * 10 + $__kh_git_behind * 10")
+    set -l mp (math "max(0, 100 - $drift)")
     echo $mp
 end
 

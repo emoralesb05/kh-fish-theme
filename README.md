@@ -8,36 +8,29 @@ A Fish shell configuration inspired by the Kingdom Hearts universe. Features an 
 
 ## Prompt
 
-The prompt has 3 configurable modes. Switch between them with:
+The prompt has 2 configurable modes:
 
 ```fish
-set -g KH_PROMPT_MODE full      # Command Menu box (default)
-set -g KH_PROMPT_MODE compact   # Inline menu
-set -g KH_PROMPT_MODE minimal   # 2-line minimal
+set -g KH_PROMPT_MODE full      # 2-line with party, HP/MP bars (default)
+set -g KH_PROMPT_MODE minimal   # Single line, duration only
 ```
 
 ### Full Mode
 
 ```
   ~/Github/myproject  main ↑2 +1 ~3 ?2 ≡1       Node 20.11 · Python 3.12 · Docker
-  ⚔ Traverse Town  ❯ _                              1.2s HP▕████████━━▏ MP▕█████━━━━━▏
+  ⚔ Traverse Town  ❯ _                        1.2s HP▕████████━━▏ MP▕█████━━━━━▏
 ```
 
-Path and git status appear on the first line, with party members right-aligned. The input line shows the world badge and keyblade cursor. The right prompt shows command duration and gauge bars.
-
-### Compact Mode
-
-```
-  ~/Github/myproject  main ↑2 +1 ~3                           Node · Docker
-  ⚔ Traverse Town  ❯ _                              1.2s HP▕████████━━▏ MP▕█████━━━━━▏
-```
+Path and git status on line 1, with party members (detected runtimes) right-aligned. World badge and keyblade cursor on line 2. Right prompt shows command duration, HP bar, and MP bar.
 
 ### Minimal Mode
 
 ```
-  ~/Github/myproject  main ↑2 +1 ~3
-  ⚔ Traverse Town  ❯ _                              1.2s HP▕████████━━▏ MP▕█████━━━━━▏
+ ⚔ Traverse Town  ~/Github/myproject  main ↑2 +1 ~3  ❯ _                   1.2s
 ```
+
+Everything on one line — world badge, path, git, cursor. Right prompt shows only command duration. No party members or gauge bars.
 
 ## Interactive Command Menu
 
@@ -125,9 +118,9 @@ Shown inline after the path when inside a git repository:
 | `≡1` | 1 stash entry | Mauve |
 | `✓` | Clean working tree | Green |
 
-### Party Members
+### Party Members (Full Mode)
 
-Detected runtimes show on the path line (full mode) or inline (compact mode). Detection is based on project files in the current directory:
+Detected runtimes show right-aligned on the path line. Detection is based on project files in the current directory:
 
 | Runtime | Detected by |
 |---------|-------------|
@@ -153,13 +146,13 @@ The project type is mapped to a Kingdom Hearts world name, shown as a badge on t
 | **Radiant Garden** | Documentation (docs/ directory) |
 | **Destiny Islands** | Default / no project detected |
 
-## Gauge Bars (Right Prompt)
-
-Two gauge bars in the right prompt represent meaningful dev metrics:
+## Right Prompt (Full Mode)
 
 ```
 1.2s HP▕████████━━▏ MP▕█████━━━━━▏
 ```
+
+In minimal mode, only command duration is shown.
 
 ### HP — Repo Cleanliness
 
@@ -171,17 +164,18 @@ Full when clean, depletes as your working tree gets dirty.
 - Staged files: -2 per file
 - Color: green (>60%) → gold (30-60%) → red (<30%)
 
-### MP — Branch Focus
+### MP — Remote Sync
 
-Full when changes are focused, depletes as changes spread across files and directories.
+Full when in sync with remote, depletes as you drift ahead or behind.
 
-- Each changed file: -2
-- Each directory touched: -6
-- Color: teal → teal → pink (like MP recharging in KH)
+- Each commit ahead: -10
+- Each commit behind: -10
+- In sync or no remote: full
+- Color: teal → teal → pink
 
 ### Command Duration
 
-Shown as small text before the bars when a command takes >100ms. Format: `ms`, `s`, or `m`.
+Shown before the bars when a command takes >100ms. Format: `ms`, `s`, or `m`. Visible in both modes.
 
 ## Commands
 
@@ -249,8 +243,8 @@ Real Kingdom Hearts quotes appear occasionally (~33% of the time) before non-tri
 All settings use `set -g` and can be placed in your `config.fish` or set interactively:
 
 ```fish
-set -g KH_PROMPT_MODE 'full'     # Prompt style: full | compact | minimal
-set -g KH_SHOW_PARTY 'true'     # Show detected runtimes as party members
+set -g KH_PROMPT_MODE 'full'     # Prompt style: full | minimal
+set -g KH_SHOW_PARTY 'true'     # Show detected runtimes as party members (full mode)
 set -g KH_SHOW_WORLD 'true'     # Show project type as KH world name
 set -g KH_SHOW_CLOCK 'true'     # Show clock in right prompt
 set -g KH_BAR_WIDTH 10          # Gauge bar width (auto-shrinks to 6 on narrow terminals)

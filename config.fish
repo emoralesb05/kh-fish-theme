@@ -40,7 +40,7 @@ set -g fish_color_selection         $KH_DARK       # Dark purple-blue (panel bg)
 set -g fish_autosuggestion_highlight_color $KH_SLATE
 
 # ── Configuration ──
-# Prompt mode: 'full' (command menu box), 'compact' (inline menu), 'minimal' (2-line)
+# Prompt mode: 'full' (path/git/party + world badge) or 'minimal' (path/git + world badge)
 if not set -q KH_PROMPT_MODE
     set -g KH_PROMPT_MODE 'full'
 end
@@ -138,33 +138,25 @@ function fish_prompt
 
     set -l display_path (__fish_kh_path)
     set -l git_info (__fish_kh_git_prompt)
-    set -l fourth_slot (__fish_kh_4th_slot)
-    set -l party (__fish_kh_party_members)
     set -l world (__fish_kh_detect_world)
-    set -l cursor_pos (__fish_kh_menu_cursor)
 
     switch $KH_PROMPT_MODE
-        case full
-            __fish_kh_prompt_full $last_status "$display_path" "$git_info" "$fourth_slot" "$party" "$world" $cursor_pos
-        case compact
-            __fish_kh_prompt_compact $last_status "$display_path" "$git_info" "$fourth_slot" "$party" "$world" $cursor_pos
         case minimal
             __fish_kh_prompt_minimal $last_status "$display_path" "$git_info" "$world"
         case '*'
-            __fish_kh_prompt_full $last_status "$display_path" "$git_info" "$fourth_slot" "$party" "$world" $cursor_pos
+            set -l party (__fish_kh_party_members)
+            __fish_kh_prompt_full $last_status "$display_path" "$git_info" "$party" "$world"
     end
 end
 
 # ── Prompt Mode: Full ──
-# Path/git/party info + world badge input line (interactive menu via Ctrl+Space)
+# Path/git/party on line 1, world badge + cursor on line 2
 function __fish_kh_prompt_full
     set -l last_status $argv[1]
     set -l display_path $argv[2]
     set -l git_info $argv[3]
-    set -l fourth_slot $argv[4]
-    set -l party $argv[5]
-    set -l world $argv[6]
-    set -l cursor_pos $argv[7]
+    set -l party $argv[4]
+    set -l world $argv[5]
 
     if test $last_status -ne 0
         set cursor_color $KH_RED
@@ -172,7 +164,7 @@ function __fish_kh_prompt_full
         set cursor_color $KH_GLOW
     end
 
-    # Line 1: path + git on left, party pushed to right edge
+    # Line 1: path + git on left, party right-aligned
     set -l left_text "  $display_path"
     if test -n "$git_info"
         set -l git_info_plain (string replace -ra '\e\[[^m]*m' '' -- "$git_info")
@@ -185,11 +177,10 @@ function __fish_kh_prompt_full
         echo -n " $git_info"
     end
 
-    # Right-align party members
     if test -n "$party"
         set -l left_len (string length -- "$left_text")
         set -l party_len (string length -- "$party")
-        set -l padding (math "$COLUMNS - $left_len - $party_len - 1")
+        set -l padding (math "$COLUMNS - $left_len - $party_len")
         if test $padding -gt 0
             printf '%*s' $padding ''
         end
@@ -212,64 +203,8 @@ function __fish_kh_prompt_full
     set_color normal
 end
 
-# ── Prompt Mode: Compact ──
-# Path/git + party on one line, world badge input line (interactive menu via Ctrl+Space)
-function __fish_kh_prompt_compact
-    set -l last_status $argv[1]
-    set -l display_path $argv[2]
-    set -l git_info $argv[3]
-    set -l fourth_slot $argv[4]
-    set -l party $argv[5]
-    set -l world $argv[6]
-    set -l cursor_pos $argv[7]
-
-    if test $last_status -ne 0
-        set cursor_color $KH_RED
-    else
-        set cursor_color $KH_GLOW
-    end
-
-    # Line 1: path + git on left, party right-aligned
-    set -l left_text "  $display_path"
-    if test -n "$git_info"
-        set -l git_info_plain (string replace -ra '\e\[[^m]*m' '' -- "$git_info")
-        set left_text "$left_text $git_info_plain"
-    end
-
-    set_color $KH_GOLD
-    echo -n "  $display_path"
-    if test -n "$git_info"
-        echo -n " $git_info"
-    end
-
-    # Right-align party members
-    if test -n "$party"
-        set -l left_len (string length -- "$left_text")
-        set -l party_len (string length -- "$party")
-        set -l padding (math "$COLUMNS - $left_len - $party_len - 1")
-        if test $padding -gt 0
-            printf '%*s' $padding ''
-        end
-        set_color $KH_ICY
-        echo -n "$party"
-    end
-    set_color normal
-    echo
-
-    # Input line — world badge + cursor
-    echo -n ' '
-    if test -n "$world"
-        set_color $KH_WHITE --background=$KH_BLUE
-        echo -n " ⚔ $world "
-        set_color normal
-        echo -n ' '
-    end
-    set_color $cursor_color
-    echo -n '❯ '
-    set_color normal
-end
-
 # ── Prompt Mode: Minimal ──
+# Single line: world badge + path + git + cursor
 function __fish_kh_prompt_minimal
     set -l last_status $argv[1]
     set -l display_path $argv[2]
@@ -282,15 +217,6 @@ function __fish_kh_prompt_minimal
         set cursor_color $KH_GLOW
     end
 
-    # Line 1: path + git
-    set_color $KH_GOLD
-    echo -n "  $display_path"
-    if test -n "$git_info"
-        echo -n " $git_info"
-    end
-    echo
-
-    # Input line with world badge
     echo -n ' '
     if test -n "$world"
         set_color $KH_WHITE --background=$KH_BLUE
@@ -298,6 +224,13 @@ function __fish_kh_prompt_minimal
         set_color normal
         echo -n ' '
     end
+    set_color $KH_GOLD
+    echo -n " $display_path"
+    if test -n "$git_info"
+        echo -n " $git_info"
+    end
+    set_color normal
+    echo -n ' '
     set_color $cursor_color
     echo -n '❯ '
     set_color normal
@@ -305,9 +238,6 @@ end
 
 # ── Right Prompt — KH Character HUD ──
 function fish_right_prompt
-    set -l hp (__fish_kh_hp_level)
-    set -l mp (__fish_kh_mp_level)
-
     # Command duration
     if test "$CMD_DURATION" -gt 100 2>/dev/null
         set -l duration_str
@@ -322,10 +252,14 @@ function fish_right_prompt
         echo -n "$duration_str  "
     end
 
-    # HP + MP bars
-    __fish_kh_render_bar 'HP' $hp $KH_GREEN $KH_GOLD $KH_RED
-    echo -n ' '
-    __fish_kh_render_bar 'MP' $mp $KH_TEAL $KH_TEAL $KH_MAUVE
+    # HP + MP bars (full mode only)
+    if test "$KH_PROMPT_MODE" != 'minimal'
+        set -l hp (__fish_kh_hp_level)
+        set -l mp (__fish_kh_mp_level)
+        __fish_kh_render_bar 'HP' $hp $KH_GREEN $KH_GOLD $KH_RED
+        echo -n ' '
+        __fish_kh_render_bar 'MP' $mp $KH_TEAL $KH_TEAL $KH_MAUVE
+    end
 
     # Optional clock
     if test "$KH_SHOW_CLOCK" = 'true'
