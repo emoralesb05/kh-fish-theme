@@ -253,8 +253,17 @@ function gummi_return
     echo "🏠 Returning to main world..."
     set_color normal
     
-    # Try to find main branch
-    if git show-ref --verify --quiet refs/heads/main
+    # Try to find main branch (KH_HOME_BRANCH overrides auto-detect)
+    if test -n "$KH_HOME_BRANCH"
+        if git show-ref --verify --quiet "refs/heads/$KH_HOME_BRANCH"
+            set main_branch "$KH_HOME_BRANCH"
+        else
+            set_color '#ff005f'
+            echo "🌑 No main world found! ($KH_HOME_BRANCH branch does not exist)"
+            set_color normal
+            return 1
+        end
+    else if git show-ref --verify --quiet refs/heads/main
         set main_branch "main"
     else if git show-ref --verify --quiet refs/heads/master
         set main_branch "master"

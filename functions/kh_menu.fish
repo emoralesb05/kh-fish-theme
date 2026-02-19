@@ -541,6 +541,10 @@ function __kh_menu_select
                     __kh_menu_load_branches
                 case config
                     __kh_menu_load_config
+                case save_point
+                    __kh_menu_load_save_point
+                case load_point
+                    __kh_menu_load_load_point
                 case '*'
                     # Unknown submenu — treat as no-op
                     set -e __kh_menu_stack[-1]
@@ -614,6 +618,10 @@ function __kh_menu_back
             __kh_menu_load_traverse
         case config
             __kh_menu_load_config
+        case save_point
+            __kh_menu_load_save_point
+        case load_point
+            __kh_menu_load_load_point
     end
 
     set -g __kh_menu_cursor $saved_cursor
@@ -629,7 +637,7 @@ function __kh_menu_load_root
     set -g __kh_menu_searchable 0
 
     set -g __kh_menu_ids     attack  magic  summon  traverse  config
-    set -g __kh_menu_labels  'Attack' 'Magic' 'Summon' 'Traverse' 'Config'
+    set -g __kh_menu_labels  'Attack' 'Magic' 'Summon' 'Travel' 'Config'
     set -g __kh_menu_types   submenu submenu submenu submenu submenu
     set -g __kh_menu_commands '' '' '' '' ''
 end
@@ -752,9 +760,9 @@ function __kh_menu_load_summon
     set -a __kh_menu_commands 'heartless'
 end
 
-# ── Traverse: Branch navigation (searchable branch picker inside) ──
+# ── Travel: Branch navigation (searchable branch picker inside) ──
 function __kh_menu_load_traverse
-    set -g __kh_menu_title 'Traverse'
+    set -g __kh_menu_title 'Travel'
     set -g __kh_menu_current_id 'traverse'
     set -g __kh_menu_searchable 0
 
@@ -766,7 +774,7 @@ function __kh_menu_load_traverse
     if command git rev-parse --git-dir >/dev/null 2>&1
         if test (count $__kh_menu_branches) -gt 0
             set -a __kh_menu_ids     traverse_branches
-            set -a __kh_menu_labels  'Switch Branch'
+            set -a __kh_menu_labels  'Traverse'
             set -a __kh_menu_types   submenu
             set -a __kh_menu_commands ''
         end
@@ -788,9 +796,9 @@ function __kh_menu_load_traverse
     end
 end
 
-# ── Traverse > Switch Branch (searchable) ──
+# ── Travel > Traverse (searchable branch picker) ──
 function __kh_menu_load_branches
-    set -g __kh_menu_title 'Switch Branch'
+    set -g __kh_menu_title 'Traverse'
     set -g __kh_menu_current_id 'traverse_branches'
     set -g __kh_menu_searchable 1
     set -g __kh_menu_filter ''
@@ -833,7 +841,7 @@ function __kh_menu_load_branches
     set -g __kh_menu_unfiltered_commands $__kh_menu_commands
 end
 
-# ── Config: Save/load stash, theme settings ──
+# ── Config: Save points, load points, utilities ──
 function __kh_menu_load_config
     set -g __kh_menu_title 'Config'
     set -g __kh_menu_current_id 'config'
@@ -844,46 +852,78 @@ function __kh_menu_load_config
     set -g __kh_menu_types
     set -g __kh_menu_commands
 
-    # Save/Load (stash operations)
     if command git rev-parse --git-dir >/dev/null 2>&1
-        set -a __kh_menu_ids     save_item
-        set -a __kh_menu_labels  'Save'
-        set -a __kh_menu_types   action
-        set -a __kh_menu_commands 'save'
+        set -a __kh_menu_ids     save_point
+        set -a __kh_menu_labels  'Save Point'
+        set -a __kh_menu_types   submenu
+        set -a __kh_menu_commands ''
 
-        set -a __kh_menu_ids     save_msg
-        set -a __kh_menu_labels  'Save As...'
-        set -a __kh_menu_types   input
-        set -a __kh_menu_commands 'save '
-
-        set -a __kh_menu_ids     load_item
-        set -a __kh_menu_labels  'Load'
-        set -a __kh_menu_types   action
-        set -a __kh_menu_commands 'load'
-
-        set -a __kh_menu_ids     load_list
-        set -a __kh_menu_labels  'Load List'
-        set -a __kh_menu_types   action
-        set -a __kh_menu_commands 'load list'
-
-        # Individual stashes
-        if test (count $__kh_menu_stashes) -gt 0
-            for i in (seq 1 (count $__kh_menu_stashes))
-                set -l stash_num $__kh_menu_stashes[$i]
-                set -l stash_lbl $__kh_menu_stash_labels[$i]
-                set -a __kh_menu_ids     "stash_$stash_num"
-                set -a __kh_menu_labels  "$stash_lbl"
-                set -a __kh_menu_types   action
-                set -a __kh_menu_commands "load $stash_num"
-            end
-        end
+        set -a __kh_menu_ids     load_point
+        set -a __kh_menu_labels  'Load Point'
+        set -a __kh_menu_types   submenu
+        set -a __kh_menu_commands ''
     end
 
-    # Theme utilities
     set -a __kh_menu_ids     refresh
-    set -a __kh_menu_labels  'Refresh'
+    set -a __kh_menu_labels  'Refresh HUD'
     set -a __kh_menu_types   action
     set -a __kh_menu_commands 'kh_refresh'
+end
+
+# ── Config > Save Point ──
+function __kh_menu_load_save_point
+    set -g __kh_menu_title 'Save Point'
+    set -g __kh_menu_current_id 'save_point'
+    set -g __kh_menu_searchable 0
+
+    set -g __kh_menu_ids
+    set -g __kh_menu_labels
+    set -g __kh_menu_types
+    set -g __kh_menu_commands
+
+    set -a __kh_menu_ids     save_quick
+    set -a __kh_menu_labels  'Save'
+    set -a __kh_menu_types   action
+    set -a __kh_menu_commands 'save'
+
+    set -a __kh_menu_ids     save_msg
+    set -a __kh_menu_labels  'Save As...'
+    set -a __kh_menu_types   input
+    set -a __kh_menu_commands 'save '
+end
+
+# ── Config > Load Point ──
+function __kh_menu_load_load_point
+    set -g __kh_menu_title 'Load Point'
+    set -g __kh_menu_current_id 'load_point'
+    set -g __kh_menu_searchable 0
+
+    set -g __kh_menu_ids
+    set -g __kh_menu_labels
+    set -g __kh_menu_types
+    set -g __kh_menu_commands
+
+    set -a __kh_menu_ids     load_latest
+    set -a __kh_menu_labels  'Load Latest'
+    set -a __kh_menu_types   action
+    set -a __kh_menu_commands 'load'
+
+    # Individual stashes
+    if test (count $__kh_menu_stashes) -gt 0
+        for i in (seq 1 (count $__kh_menu_stashes))
+            set -l stash_num $__kh_menu_stashes[$i]
+            set -l stash_lbl $__kh_menu_stash_labels[$i]
+            set -a __kh_menu_ids     "stash_$stash_num"
+            set -a __kh_menu_labels  "$stash_lbl"
+            set -a __kh_menu_types   action
+            set -a __kh_menu_commands "load $stash_num"
+        end
+    else
+        set -a __kh_menu_ids     no_stashes
+        set -a __kh_menu_labels  'No save points'
+        set -a __kh_menu_types   disabled
+        set -a __kh_menu_commands ''
+    end
 end
 
 # ── Terminal Resize Handler ──

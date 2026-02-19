@@ -69,6 +69,9 @@ end
 if not set -q KH_MENU_MAX_ITEMS
     set -g KH_MENU_MAX_ITEMS 15
 end
+if not set -q KH_HOME_BRANCH
+    set -g KH_HOME_BRANCH ''
+end
 
 # ── Accessibility Color Overrides ──
 switch $KH_A11Y
