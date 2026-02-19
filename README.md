@@ -1,6 +1,6 @@
 # Kingdom Hearts Fish Theme
 
-A Fish shell configuration inspired by the Kingdom Hearts universe. Features a KH Command Menu prompt, HP/MP gauge bars, world detection, party member display, Heartless encounters, and themed git navigation.
+A Fish shell configuration inspired by the Kingdom Hearts universe. Features an interactive Command Menu prompt, HP/MP gauge bars, world detection, party member display, Heartless encounters, and themed git navigation.
 
 ![Kingdom Hearts Terminal](https://img.shields.io/badge/Theme-Kingdom%20Hearts-purple?style=for-the-badge&logo=terminal)
 ![Fish Shell](https://img.shields.io/badge/Shell-Fish-blue?style=for-the-badge&logo=terminal)
@@ -20,21 +20,15 @@ set -g KH_PROMPT_MODE minimal   # 2-line minimal
 
 ```
   ~/Github/myproject  main ↑2 +1 ~3 ?2 ≡1       Node 20.11 · Python 3.12 · Docker
- ╭──────────────╮
- │▶ Attack      │
- │  Magic       │
- │  Items       │
- │  Save        │
- ╰──────────────╯
   ⚔ Traverse Town  ❯ _                              1.2s HP▕████████━━▏ MP▕█████━━━━━▏
 ```
 
-Path and git status appear above the menu box, with party members right-aligned. The selected menu row gets a highlight background with a `▶` cursor. Unselected rows have a dark panel background. The cursor position changes randomly each prompt. The right prompt shows command duration and gauge bars.
+Path and git status appear on the first line, with party members right-aligned. The input line shows the world badge and keyblade cursor. The right prompt shows command duration and gauge bars.
 
 ### Compact Mode
 
 ```
-  ▶Attack  Magic Items Save  ~/Github/myproject  main ↑2 +1 ~3       Node · Docker
+  ~/Github/myproject  main ↑2 +1 ~3                           Node · Docker
   ⚔ Traverse Town  ❯ _                              1.2s HP▕████████━━▏ MP▕█████━━━━━▏
 ```
 
@@ -44,6 +38,68 @@ Path and git status appear above the menu box, with party members right-aligned.
   ~/Github/myproject  main ↑2 +1 ~3
   ⚔ Traverse Town  ❯ _                              1.2s HP▕████████━━▏ MP▕█████━━━━━▏
 ```
+
+## Interactive Command Menu
+
+Press **⌥ Space** (Option+Space on macOS) to open the Command Menu overlay. Navigate with arrow keys, Enter to select, Left/Escape to go back.
+
+```
+ ╭─── COMMAND ───╮
+ │▶ Attack       │
+ │  Magic        │
+ │  Scan         │
+ │  Travel       │
+ │  Config       │
+ ╰───────────────╯
+```
+
+### Menu Structure
+
+| Menu | Description |
+|------|-------------|
+| **Attack** | Git workflow actions (stage, commit, push, pull, branch cleanup) |
+| **Magic** | Project scripts via npm/pnpm — searchable with type-to-filter |
+| **Scan** | Info dashboards (dive, explore, enemy stats) |
+| **Travel** | Branch navigation (switch, create, go home) |
+| **Config** | Save/load points (git stash), refresh HUD |
+
+### Attack
+
+| Item | Command | Description |
+|------|---------|-------------|
+| Strike (stage) | `git add -A` | Stage all changes |
+| Combo (commit)... | `git commit -m "` | Start a commit (type your message) |
+| Drive (push) | `git push` | Push to remote |
+| Guard (pull) | `git pull` | Pull from remote |
+| Sanctuary (clean)... | `sanctuary` | Delete branches except specified ones |
+
+### Magic
+
+Lists all scripts from `package.json`. **Searchable** — just start typing to filter the list. Backspace to remove characters, Escape/Left to clear the filter.
+
+### Scan
+
+| Item | Command | Description |
+|------|---------|-------------|
+| Dive | `dive` | Deep status report (git + system info) |
+| Explore | `explore` | Detailed current branch status |
+| Enemies | `heartless` | Heartless encounter stats for this session |
+
+### Travel
+
+| Item | Command | Description |
+|------|---------|-------------|
+| Traverse ▸ | — | **Searchable** branch picker submenu |
+| Unlock... | `unlock` | Create and switch to a new branch |
+| Home | `home` | Return to main branch (configurable via `KH_HOME_BRANCH`) |
+
+### Config
+
+| Item | Command | Description |
+|------|---------|-------------|
+| Save Point ▸ | — | Submenu: Save (quick stash) or Save As... (stash with message) |
+| Load Point ▸ | — | Submenu: Load Latest (pop) or pick from individual stashes |
+| Refresh HUD | `kh_refresh` | Clear world/party detection caches |
 
 ## Prompt Elements
 
@@ -68,17 +124,6 @@ Shown inline after the path when inside a git repository:
 | `!1` | 1 merge conflict | Red |
 | `≡1` | 1 stash entry | Mauve |
 | `✓` | Clean working tree | Green |
-
-### 4th Menu Slot (Context-Sensitive)
-
-The bottom menu item changes based on your current state, just like in the game:
-
-| Slot | Condition |
-|------|-----------|
-| **Save** | Uncommitted changes exist |
-| **Drive** | Unpushed commits (momentum to push) |
-| **Summon** | Not in a git repository |
-| **Defend** | Clean and in sync with remote |
 
 ### Party Members
 
@@ -144,11 +189,10 @@ Shown as small text before the bars when a command takes >100ms. Format: `ms`, `
 
 | Command | Description |
 |---------|-------------|
-| `ship` | List all branches as "worlds" |
 | `traverse <branch>` | Switch to a branch |
 | `unlock <branch>` | Create and switch to a new branch |
 | `explore` | Detailed current branch status |
-| `home` | Switch back to main/master |
+| `home` | Switch back to main/master (or `KH_HOME_BRANCH`) |
 | `sanctuary [branches]` | Delete branches except specified ones (keeps main, develop) |
 
 ### Save Points (Git Stash)
@@ -208,10 +252,13 @@ All settings use `set -g` and can be placed in your `config.fish` or set interac
 set -g KH_PROMPT_MODE 'full'     # Prompt style: full | compact | minimal
 set -g KH_SHOW_PARTY 'true'     # Show detected runtimes as party members
 set -g KH_SHOW_WORLD 'true'     # Show project type as KH world name
-set -g KH_SHOW_CLOCK 'true'     # Show clock in right prompt (on by default)
+set -g KH_SHOW_CLOCK 'true'     # Show clock in right prompt
 set -g KH_BAR_WIDTH 10          # Gauge bar width (auto-shrinks to 6 on narrow terminals)
 set -g KH_HEARTLESS 'true'      # Show Heartless encounters on command failure
 set -g KH_A11Y 'off'            # Accessibility: off | high-contrast | colorblind
+set -g KH_HOME_BRANCH ''        # Override home branch (default: auto-detect main/master)
+set -g KH_MENU_ANIMATE 'true'   # Menu open/close animation
+set -g KH_MENU_MAX_ITEMS 15     # Max visible menu items before scrolling
 ```
 
 ### Accessibility Modes (`KH_A11Y`)
@@ -275,9 +322,11 @@ source ~/.config/fish/config.fish
 │   ├── gummi_ship.fish           # Git branch management commands
 │   ├── kh_heartless.fish         # Heartless encounter system
 │   ├── kh_hud_helpers.fish       # HUD: git data, bars, party, world detection
+│   ├── kh_menu.fish              # Interactive Command Menu system
+│   ├── kh_menu_bindings.fish     # Menu keybindings (⌥ Space trigger, navigation)
 │   ├── kingdom_hearts_welcome.fish # Welcome screen
 │   ├── load.fish                 # Load Save Point (git stash pop/apply)
-│   ├── sanctuary.fish            # Branch purification
+│   ├── sanctuary.fish            # Branch purification with keep-list
 │   └── save.fish                 # Save Point (git stash push)
 └── completions/
     ├── cast.fish                 # Tab completion for cast

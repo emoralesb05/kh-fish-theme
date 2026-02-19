@@ -637,7 +637,7 @@ function __kh_menu_load_root
     set -g __kh_menu_searchable 0
 
     set -g __kh_menu_ids     attack  magic  summon  traverse  config
-    set -g __kh_menu_labels  'Attack' 'Magic' 'Summon' 'Travel' 'Config'
+    set -g __kh_menu_labels  'Attack' 'Magic' 'Scan' 'Travel' 'Config'
     set -g __kh_menu_types   submenu submenu submenu submenu submenu
     set -g __kh_menu_commands '' '' '' '' ''
 end
@@ -723,7 +723,7 @@ end
 
 # ── Summon: Info & status dashboards ──
 function __kh_menu_load_summon
-    set -g __kh_menu_title 'Summon'
+    set -g __kh_menu_title 'Scan'
     set -g __kh_menu_current_id 'summon'
     set -g __kh_menu_searchable 0
 
@@ -742,15 +742,8 @@ function __kh_menu_load_summon
     set -a __kh_menu_types   action
     set -a __kh_menu_commands 'explore'
 
-    if command git rev-parse --git-dir >/dev/null 2>&1
-        set -a __kh_menu_ids     ship
-        set -a __kh_menu_labels  'Ship'
-        set -a __kh_menu_types   action
-        set -a __kh_menu_commands 'ship'
-    end
-
     set -a __kh_menu_ids     heartless
-    set -a __kh_menu_labels  'Heartless'
+    set -a __kh_menu_labels  'Enemies'
     set -a __kh_menu_types   action
     set -a __kh_menu_commands 'heartless'
 end
