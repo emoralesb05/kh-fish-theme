@@ -655,32 +655,27 @@ function __kh_menu_load_attack
 
     if command git rev-parse --git-dir >/dev/null 2>&1
         set -a __kh_menu_ids     stage_all
-        set -a __kh_menu_labels  'Stage All'
+        set -a __kh_menu_labels  'Strike (stage)'
         set -a __kh_menu_types   action
         set -a __kh_menu_commands 'git add -A'
 
         set -a __kh_menu_ids     commit
-        set -a __kh_menu_labels  'Commit...'
+        set -a __kh_menu_labels  'Combo (commit)...'
         set -a __kh_menu_types   input
         set -a __kh_menu_commands 'git commit -m "'
 
         set -a __kh_menu_ids     push
-        set -a __kh_menu_labels  'Push'
+        set -a __kh_menu_labels  'Drive (push)'
         set -a __kh_menu_types   action
         set -a __kh_menu_commands 'git push'
 
         set -a __kh_menu_ids     pull
-        set -a __kh_menu_labels  'Pull'
+        set -a __kh_menu_labels  'Guard (pull)'
         set -a __kh_menu_types   action
         set -a __kh_menu_commands 'git pull'
 
-        set -a __kh_menu_ids     purify
-        set -a __kh_menu_labels  'Purify'
-        set -a __kh_menu_types   action
-        set -a __kh_menu_commands 'purify'
-
         set -a __kh_menu_ids     sanctuary
-        set -a __kh_menu_labels  'Sanctuary...'
+        set -a __kh_menu_labels  'Sanctuary (clean)...'
         set -a __kh_menu_types   input
         set -a __kh_menu_commands 'sanctuary '
     else

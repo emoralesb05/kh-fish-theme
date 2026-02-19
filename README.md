@@ -149,7 +149,6 @@ Shown as small text before the bars when a command takes >100ms. Format: `ms`, `
 | `unlock <branch>` | Create and switch to a new branch |
 | `explore` | Detailed current branch status |
 | `home` | Switch back to main/master |
-| `purify` | Delete all branches except main/master |
 | `sanctuary [branches]` | Delete branches except specified ones (keeps main, develop) |
 
 ### Save Points (Git Stash)

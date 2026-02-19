@@ -127,7 +127,6 @@ alias traverse='gummi_traverse'
 alias unlock='gummi_unlock'
 alias explore='gummi_explore'
 alias home='gummi_return'
-alias purify='gummi_purify'
 
 
 # Magic casting commands

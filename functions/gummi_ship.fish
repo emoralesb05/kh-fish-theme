@@ -44,7 +44,7 @@ function gummi_ship
     echo "  gummi_unlock / unlock <world>        - Unlock a new world (create branch)"
     echo "  gummi_explore / explore              - Explore current world's status"
     echo "  gummi_return / home                  - Return to main world (main/master)"
-    echo "  gummi_purify / purify                - Purify all worlds except main/master"
+    echo "  sanctuary <branches>                 - Purify all worlds except specified branches"
     set_color normal
 end
 
@@ -288,80 +288,3 @@ function gummi_return
     end
 end
 
-function gummi_purify
-    # Check if we're in a git repository
-    if not git rev-parse --git-dir >/dev/null 2>&1
-        set_color '#ff005f'
-        echo "🌑 No world's heart found! You must be in a git repository."
-        set_color normal
-        return 1
-    end
-    
-    set_color '#ff00ff'
-    echo "╔══════════════════════════════════════════════════════════════╗"
-    set_color yellow
-    echo "║                    PURIFYING WORLDS                          ║"
-    set_color '#ff00ff'
-    echo "╚══════════════════════════════════════════════════════════════╝"
-    set_color normal
-    
-    gummi_return
-    
-    # Get all local branches except main/master
-    set local_branches (git branch --format='%(refname:short)' 2>/dev/null | string trim | grep -v '^main$' | grep -v '^master$')
-    
-    if test -z "$local_branches"
-        set_color '#00ff9f'
-        echo "✨ No corrupted worlds to purify! Only the pure light remains."
-        set_color normal
-        return 0
-    end
-    
-    set_color '#ff005f'
-    echo "🌑 Corrupted worlds to purify:"
-    for branch in $local_branches
-        echo "  💀 $branch"
-    end
-    set_color normal
-    
-    # Ask for confirmation
-    set_color '#ffff00'
-    echo ""
-    echo "⚠️  This will permanently destroy these worlds!"
-    echo "   Only the pure light of $main_branch will remain."
-    echo ""
-    read -l -P "🗝️  Are you sure? Type 'purify' to confirm: " confirm
-    
-    if test "$confirm" = "purify"
-        set_color '#00ff9f'
-        echo "✨ Beginning purification ritual..."
-        set_color normal
-        
-        set deleted_count 0
-        for branch in $local_branches
-            if git branch -D $branch
-                set_color '#00ff9f'
-                echo "  ✨ Purified: $branch"
-                set_color normal
-                set deleted_count (math $deleted_count + 1)
-            else
-                set_color '#ff005f'
-                echo "  🌑 Failed to purify: $branch"
-                set_color normal
-            end
-        end
-        
-        set_color '#ffff00'
-        echo ""
-        echo "✨ Purification complete! $deleted_count worlds purified."
-        echo "🌟 Only the pure light of $main_branch remains."
-        set_color normal
-        
-        # Show final status
-        gummi_explore
-    else
-        set_color '#ff005f'
-        echo "🌑 Purification ritual cancelled. Worlds remain unchanged."
-        set_color normal
-    end
-end 
